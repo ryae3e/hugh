@@ -1,22 +1,24 @@
 import openai
 import os
 import requests
+import logging
 import uuid
 from flask import Flask, request, jsonify, send_file, render_template
 
 
 # Add your OpenAI API key
-OPENAI_API_KEY = ""
+OPENAI_API_KEY = "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"
 openai.api_key = OPENAI_API_KEY
 
 # Add your ElevenLabs API key
-ELEVENLABS_API_KEY = ""
+ELEVENLABS_API_KEY = "c6995ba28395c3925db97ab4ec018945"
 ELEVENLABS_VOICE_STABILITY = 0.30
 ELEVENLABS_VOICE_SIMILARITY = 0.75
 
 # Choose your favorite ElevenLabs voice
-ELEVENLABS_VOICE_NAME = "Hugh"
+ELEVENLABS_VOICE_ID = ""  # Set to the voice_id of "GOR"
 ELEVENLABS_ALL_VOICES = []
+
 
 app = Flask(__name__)
 
@@ -58,10 +60,11 @@ def generate_reply(conversation: list) -> str:
 
     """
     response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
+      model="gpt-3.5-turbo-16k",
       messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-        ] + conversation
+    {"role": "system", "content": 'playing the role of gord downie of the tragically hip. you are wise and thoughful and above all you are always kind and considerate of others. you always use the short for "the hip" when refereing to the band. You also quite often use lines from tragically hip songs to reinforce a point or sometimes for no reason at all. you often play with language and amuse yoursef that way'},
+] + conversation
+
     )
     return response["choices"][0]["message"]["content"]
 
@@ -77,11 +80,7 @@ def generate_audio(text: str, output_path: str = "") -> str:
     :rtype: str
 
     """
-    voices = ELEVENLABS_ALL_VOICES
-    try:
-        voice_id = next(filter(lambda v: v["name"] == ELEVENLABS_VOICE_NAME, voices))["voice_id"]
-    except StopIteration:
-        voice_id = voices[0]["voice_id"]
+    voice_id = ELEVENLABS_VOICE_ID  # Use ELEVENLABS_VOICE_ID directly
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     headers = {
         "xi-api-key": ELEVENLABS_API_KEY,
@@ -100,10 +99,12 @@ def generate_audio(text: str, output_path: str = "") -> str:
     return output_path
 
 
+
 @app.route('/')
 def index():
     """Render the index page."""
-    return render_template('index.html', voice=ELEVENLABS_VOICE_NAME)
+    voices = get_voices()
+    return render_template('index.html', voices=voices, selected_voice=ELEVENLABS_VOICE_ID)  # Replace ELEVENLABS_VOICE_NAME with ELEVENLABS_VOICE_ID
 
 
 @app.route('/transcribe', methods=['POST'])
@@ -141,8 +142,10 @@ def listen(filename):
 if ELEVENLABS_API_KEY:
     if not ELEVENLABS_ALL_VOICES:
         ELEVENLABS_ALL_VOICES = get_voices()
-    if not ELEVENLABS_VOICE_NAME:
-        ELEVENLABS_VOICE_NAME = ELEVENLABS_ALL_VOICES[0]["name"]
+    if not ELEVENLABS_VOICE_ID:  # Replace ELEVENLABS_VOICE_NAME with ELEVENLABS_VOICE_ID
+        ELEVENLABS_VOICE_ID = ELEVENLABS_ALL_VOICES[0]["voice_id"]  # Replace "name" with "voice_id"
+
 
 if __name__ == '__main__':
     app.run()
+app = Flask(__name__)
