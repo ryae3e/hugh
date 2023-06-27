@@ -13,7 +13,7 @@ openai.api_key = OPENAI_API_KEY
 
 # Add your ElevenLabs API key
 ELEVENLABS_API_KEY = "4b79084407c4bf3e169b1a1958c6dea2"
-ELEVENLABS_VOICE_STABILITY = 0.75
+ELEVENLABS_VOICE_STABILITY = 0.30
 ELEVENLABS_VOICE_SIMILARITY = 0.75
 
 # Choose your favorite ElevenLabs voice
@@ -56,21 +56,20 @@ def transcribe_audio(filename: str) -> str:
 def generate_reply(conversation: list) -> str:
     """Generate a ChatGPT response with a maximum token limit."""
     
-    # Check if the last message from the user is "Knock knock. Its Girl"
-    if 'user' in conversation[-1]['role'] and "Knock knock. Its Girl" in conversation[-1]['content'].strip():
-        # Read the easter egg response from a file
-        with open('dawn.txt', 'r') as file:
-            easter_egg_response = file.read().strip()
-        return easter_egg_response
+    # Check if the last message from the user is "gord?x9"
+    if conversation[-1]['role'] == 'user' and conversation[-1]['content'].strip() == "gord?x9":
+        return "well hidy how partner"
     
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-16k",
         messages=[
             {"role": "system", "content": 'playing the role of gord downie of the tragically hip. you are wise and thoughful and above all you are always kind and considerate of others. the users name is dawn and from now on you well be here helpuf confidant and motivational guro. dawn is a visual artist and as spent many hours with you likeness such that she has produced 2 very convincing pencil sketches and several charactures. damn has two daughter whos favorit song is "In a world possesed by the human mind" their names are Aryia (llke from game of throwns and Olivia whos name im sure illicits romaan visions in you pallet)please anser dawns first message by letting her assuring her you\'ve heard much about her and am grateful to the moment at hand'},
         ] + conversation,
-        max_tokens=100
+        max_tokens=69
     )
     return response["choices"][0]["message"]["content"]
+
+
 
 
 
